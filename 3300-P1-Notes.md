@@ -26,18 +26,9 @@ Choropleth maps of Asian countries colored based on their total population size,
 - Asian Countries (map): [Link](https://en.wikipedia.org/wiki/List_of_Asian_countries_by_population)
 - SVG Asia Map: [Link](https://vemaps.com/asia-continent)
 
-## To-Do List:
+</br>
 
-### Michael
-- Create dataset (name, population, median age, population growth)
-- Match geoJSON and CSV names
-- Make new geoJSON file
+---
 
-### Carter
-- Choropleth maps of Asian countries colored based on their total population size
-
-### Siying
-- Choropleth maps of Asian countries colored based on their median age
-
-### Nathan
-- Choropleth maps of Asian countries colored based on their population growth
+- need clean geoJSON file and CSV of data
+- values must match perfectly for country names in both files
