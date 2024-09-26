@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Print Country Names</title>
+    <script src="https://d3js.org/d3.v4.js"></script>
+</head>
+<body>
+
+<script>
+
+var arr = [];
+// Load the GeoJSON data
+d3.json('./asia.geojson', function(error, geojson) {
+  if (error) throw error;
+
+  var i =0;
+
+  // Loop through the features array and print each country's name
+  geojson.features.forEach(function(feature) {
+    i++;
+    console.log(feature.properties.name);  // Access the name of each country
+    console.log(i);
+    arr.push(feature.properties.name);
+  });
+
+  console.log(arr);
+});
+
+/*
+
+Countries in asia.geojson:
+
+    0 "Cyprus"
+    1 "Georgia"
+    2 "Nepal"
+    3 "Palestine"
+    4 "Qatar"
+    5 "South Korea (Republic of Korea)"
+    6 "Sri Lanka"
+    7 "Afghanistan"
+    8 "Armenia"
+    9 "Azerbaijan"
+    10 "Bangladesh"
+    11 "Bhutan"
+    12 "Brunei Darussalam"
+    13 "Cambodia"
+    14 "Israel"
+    15 "North Korea (Democratic People’s Republic of Korea)"
+    16 "China"
+    17 "India"
+    18 "Japan"
+    19 "Jordan"
+    20 "Indonesia"
+    21 "Iran"
+    22 "Iraq"
+    23 "Kazakhstan"
+    24 "Kuwait"
+    25 "Kyrgyzstan"
+    26 "Laos (Lao People’s Democratic Republic)"
+    27 "Lebanon"
+    28 "Malaysia"
+    29 "Mongolia"
+    30 "Myanmar"
+    31 "Oman"
+    32 "Pakistan"
+    33 "Philippines"
+    34 "Russia (Russian Federation)"
+    35 "Saudi Arabia"
+    36 "Syria"
+    37 "Tajikistan"
+    38 "Thailand"
+    39 "Timor-Leste"
+    40 "Turkey"
+    41 "Turkmenistan"
+    42 "United Arab Emirates"
+    43 "Uzbekistan"
+    44 "Vietnam"
+    45 "Yemen"
+
+*/
+
+</script>
+
+</body>
+</html>
