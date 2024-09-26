@@ -3,7 +3,7 @@
 ---
 
 ### Michael
-- Clean/create dataset (country name, population, median age, population growth)
+- [ ] Clean/create dataset (country name, population, median age, population growth)
 - Make new geoJSON file of only countries in data.csv
 
 ### Carter
