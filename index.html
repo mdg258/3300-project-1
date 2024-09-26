@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+<h2>Median Age in Asia (2024)</h2>
+<h3>Proof of concept</h3>
+<p>Code stolen from: <a href="https://d3-graph-gallery.com/graph/choropleth_basic.html" target="_blank">https://d3-graph-gallery.com/graph/choropleth_basic.html</a></p>
+
+<svg id="my_dataviz" width="800" height="600"></svg>
+
+<script>
+var svg = d3.select("#my_dataviz"),
+  width = +svg.attr("width"),
+  height = +svg.attr("height");
+
+
+var path = d3.geoPath();
+var projection = d3.geoMercator()
+  .scale(250) 
+  .center([100, 30])
+  .translate([width / 2, height / 2]);
+
+var data = d3.map();
+var colorScale = d3.scaleThreshold()
+  .domain([20, 25, 30, 35, 40, 45])
+  .range(d3.schemeBlues[7]);
+
+d3.queue()
+  .defer(d3.json, "./world.geojson")
+  .defer(d3.csv, "./project-data.csv", function(d) {
+    data.set(d["Country (or dependency)"], +d["Med. Age"]);
+  })
+  .await(ready);
+
+function ready(error, topo) {
+  if (error) throw error;
+  svg.append("g")
+    .selectAll("path")
+    .data(topo.features)
+    .enter()
+    .append("path")
+      .attr("d", d3.geoPath().projection(projection))
+      .attr("fill", function (d) {
+        var medianAge = data.get(d.properties.name) || 0;
+        return colorScale(medianAge);
+      })
+      .style("stroke", "#fff")
+      .style("stroke-width", 0.5);
+}
+
+</script>
+
+<br>
+<br>
+
+<p>Note:</p>
+<ul>
+  <li>asia.geojson shows us a different map, but only has 46 countries</li>
+  <li>world.geojson has all countries needed</li>
+</ul>
