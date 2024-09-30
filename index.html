@@ -26,7 +26,9 @@ const path = d3.geoPath().projection(projection);
 let data = d3.map();
 const colorScale = d3.scaleThreshold()
       .domain([20, 25, 30, 35, 40, 45, 50])
-      .range(d3.schemeBlues[7]);
+      .range(["#ffffcc", "#ffeda0", "#feb24c", "#fd8d3c", "#fc4e2a", "#e31a1c"]);  // Yellow to red gradient
+      // .range(d3.schemeBlues[7])
+      // .range(d3.schemeOranges[7])
 
 d3.csv("project-data.csv", function(d) {
   d["Med. Age"] = +d["Med. Age"].replace(/[^\d.-]/g, '');
