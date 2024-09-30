@@ -69,7 +69,8 @@ d3.csv("project-data.csv", function(d) {
       .attr("class", "country")
       .attr("d", path)
       .attr("fill", d => {
-        console.log("Processing country:", d.properties.name);
+        const medianAge = data.get(d.properties.name);
+        console.log("Processing country:", d.properties.name, "Median Age:", medianAge ? medianAge : 'No data');
         return median_country_fill(d);
       });
 
