@@ -8,8 +8,7 @@
 <h3>Proof of concept</h3>
 <p>Code revised from: <a href="https://d3-graph-gallery.com/graph/choropleth_basic.html" target="_blank">https://d3-graph-gallery.com/graph/choropleth_basic.html</a></p>
 
-<!-- Original Values -->
-<!-- <svg id="median_age" width="800" height="600"></svg> -->
+
 <svg id="median_age" width="1000" height="800"></svg>
 
 <script>
@@ -33,11 +32,10 @@ const path = d3.geoPath().projection(projection);
 
 let data = d3.map();
 const colorScale = d3.scaleThreshold()
-      .domain([20, 25, 30, 35, 40, 45, 50])
-      // yellow --> red gradient
-      .range(["#ffffcc", "#ffeda0", "#feb24c", "#fd8d3c", "#fc4e2a", "#e31a1c"]);
+      .domain([20, 25, 30, 35, 40, 45])
+      // .range(["#ffffcc", "#ffeda0", "#feb24c", "#fd8d3c", "#e31a1c"])
       // .range(d3.schemeBlues[7])
-      // .range(d3.schemeOranges[7])
+      .range(d3.schemeOranges[7]);
 
 d3.csv("project-data.csv", function(d) {
   d["Med. Age"] = +d["Med. Age"].replace(/[^\d.-]/g, '');
@@ -88,7 +86,7 @@ d3.csv("project-data.csv", function(d) {
     let legend = svg.append("g")
       .attr("transform", "translate(20,20)");
 
-    const legendData = [20, 25, 30, 35, 40, 45, 50];
+    const legendData = [20, 25, 30, 35, 40, 45];
     const legendItemHeight = 20;
        
     const yLegend = ((d, i) => i * legendItemHeight);
