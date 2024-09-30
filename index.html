@@ -37,15 +37,6 @@ d3.csv("project-data.csv", function(d) {
   d3.json("updated_world.geojson", function(error, world) {
     if (error) throw error;
     
-    world.features.forEach(function(d) {
-      if (d.properties.name === "Dem. Rep. Korea") {
-        d.properties.name = "North Korea";
-      }
-      if (d.properties.name === "Republic of Korea") {
-        d.properties.name = "South Korea";
-      }
-    });
-    
     let asiaCountriesList = [
       "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh",
       "Bhutan", "Brunei", "Cambodia", "China", "Cyprus", "Georgia",
@@ -77,7 +68,10 @@ d3.csv("project-data.csv", function(d) {
       .append("path")
       .attr("class", "country")
       .attr("d", path)
-      .attr("fill", d => median_country_fill(d));
+      .attr("fill", d => {
+        console.log("Processing country:", d.properties.name);
+        return median_country_fill(d);
+      });
 
     let legend = svg.append("g")
       .attr("transform", "translate(20,20)");
