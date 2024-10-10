@@ -115,64 +115,10 @@
   });
 </script>
 
-<h2> Population in Asia (2024)</h2>
-<svg id="population" width="1000" height="800"></svg>
-<script>
-  //geographical project & path generator 
-  const svgPop = d3.select("#population");
-  const widthPop = svgPop.attr("width");
-  const heightPop = svgPop.attr("height");
-
-  const projectionPop = d3.geoMercator()
-    .scale(250)
-    .center([90, 50])
-    .translate([widthPop / 2, heightPop / 2]);
-
-  const pathPop = d3.geoPath().projection(projectionPop);
-
-  //map to hold population data
-  let popData = d3.map();
-
-  //store population value
-  let populationValues = [];
-
-  d3.csv("project-data.csv", function (d) {
-    //parse population data from csv
-    d["Population (2024)"] = +d["Population (2024)"].replace(/["']/g, '').replace(/,/g, '');
-    popData.set(d["Country (or dependency)"], d["Population (2024)"]);
-    populationValues.push(d["Population (2024)"]);
-  }, function (error, rows) {
-    if (error) throw error;
-  });
-
-  //Geojson data for countyr boundary
-  d3.json("updated_world.geojson", function (error, world) {
-    if (error) throw error;
-
-    //calc min & max of pop. for color scale
-    const minPopulation = d3.min(populationValues);
-    const maxPopulation = d3.max(populationValues);
-    console.log("Minimum Population:", minPopulation);
-    console.log("Maximum Population:", maxPopulation);
 
 
-    let asiaCountriesListPop = [
-      "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh",
-      "Bhutan", "Brunei", "Cambodia", "China", "Cyprus", "Georgia",
-      "India", "Indonesia", "Iran", "Iraq", "Israel", "Japan", "Jordan",
-      "Kazakhstan", "Kuwait", "Kyrgyzstan", "Laos", "Lebanon", "Malaysia",
-      "Mongolia", "Myanmar", "Nepal", "North Korea", "Oman",
-      "Pakistan", "Palestine", "Philippines", "Qatar", "Russia", "Saudi Arabia",
-      "South Korea", "Sri Lanka", "Syria", "Taiwan", "Tajikistan",
-      "Thailand", "Timor-Leste", "Turkey", "Turkmenistan", "United Arab Emirates",
-      "Uzbekistan", "Vietnam", "Yemen", "Singapore", "Bahrain", "Maldives"
-    ];
 
 
-  });
-
-
-</script>
 
 
 
