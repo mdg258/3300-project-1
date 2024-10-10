@@ -238,6 +238,118 @@
   });
 </script>
 
+<h2>Population Growth of Asian Countries (2024)</h2>
+
+<svg id="growth" width="1000" height="800"></svg>
+
+<script>
+  const gsvg = d3.select("#growth")
+
+  const gwidth = gsvg.attr("width");
+  const gheight = gsvg.attr("height");
+
+  const gprojection = d3.geoMercator()
+    .scale(250)
+    .center([90, 50])
+    .translate([gwidth / 2, gheight / 2]);
+  const gpath = d3.geoPath().projection(gprojection);
+
+  let pGrowthValues = [];
+  let gdata = d3.map();
+
+  const pcolorScale = d3.scaleThreshold()
+    .domain([-1, 0, 1, 2, 3, 4, 5])  
+    .range(d3.schemeGnBu[8]); 
+
+  d3.csv("project-data.csv", function (d) {
+    d["Yearly Change"] = +d["Yearly Change"].replace(/[^\d.-]/g, '');
+    gdata.set(d["Country (or dependency)"], d["Yearly Change"]);
+    pGrowthValues.push(d["Yearly Change"]);
+  }, function (error, rows) {
+    if (error) throw error;
+
+    const minpGrowth = d3.min(pGrowthValues);
+    const maxpGrowth = d3.max(pGrowthValues);
+
+    console.log("Minimum Population Growth%:", minpGrowth);
+    console.log("Maximum Population Growth%:", maxpGrowth);
+
+    d3.json("updated_world.geojson", function (error, world) {
+      if (error) throw error;
+
+      let asiaCountriesList = [
+        "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh",
+        "Bhutan", "Brunei", "Cambodia", "China", "Cyprus", "Georgia",
+        "India", "Indonesia", "Iran", "Iraq", "Israel", "Japan", "Jordan",
+        "Kazakhstan", "Kuwait", "Kyrgyzstan", "Laos", "Lebanon", "Malaysia",
+        "Mongolia", "Myanmar", "Nepal", "North Korea", "Oman",
+        "Pakistan", "Palestine", "Philippines", "Qatar", "Russia", "Saudi Arabia",
+        "South Korea", "Sri Lanka", "Syria", "Taiwan", "Tajikistan",
+        "Thailand", "Timor-Leste", "Turkey", "Turkmenistan", "United Arab Emirates",
+        "Uzbekistan", "Vietnam", "Yemen", "Singapore", "Bahrain", "Maldives"
+      ];
+
+      let asiaCountries = world.features.filter(function (d) {
+        return asiaCountriesList.includes(d.properties.name);
+      });
+
+      const median_country_fill = d => {
+        const yearlyChange = gdata.get(d.properties.name);
+        if (yearlyChange !== undefined) {
+          return pcolorScale(yearlyChange);
+        } else {
+          return "#ccc";  
+        }
+      };
+
+      gsvg.append("g")
+        .selectAll("path")
+        .data(asiaCountries)
+        .enter()
+        .append("path")
+        .attr("class", "country")
+        .attr("d", gpath)  
+        .attr("fill", d => {
+          const yearlyChange = gdata.get(d.properties.name);
+          console.log("Processing country:", d.properties.name, "Yearly Change:", yearlyChange ? yearlyChange : 'No data');
+          return median_country_fill(d);
+        });
+
+      let legend = gsvg.append("g")
+        .attr("transform", "translate(20,20)");
+
+      const legendData = [-1, 0, 1, 2, 3, 4, 5];
+      const legendItemHeight = 20;
+
+      const yLegend = ((d, i) => i * legendItemHeight);
+
+      legend.selectAll("rect")
+        .data(legendData)
+        .enter()
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", yLegend)
+        .attr("width", 20)
+        .attr("height", 20)
+        .attr("fill", d => pcolorScale(d));
+
+      legend.selectAll("text")
+        .data(legendData)
+        .enter()
+        .append("text")
+        .attr("x", 30)
+        .attr("y", (d, i) => i * legendItemHeight + 15)
+        .text(d => `${d}%`);
+
+      legend.append("text")
+        .attr("x", 0)
+        .attr("y", -6)
+        .style("font-weight", "bold")
+        .text("Population Growth (%)");
+    });
+  });
+</script>
+
 
 
 
