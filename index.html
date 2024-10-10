@@ -9,11 +9,11 @@
 </head>
 
 <body>
-  <h2>Median Age in Asia (2024)</h2>
   <h3>Proof of concept</h3>
   <p>Code revised from: <a href="https://d3-graph-gallery.com/graph/choropleth_basic.html"
       target="_blank">https://d3-graph-gallery.com/graph/choropleth_basic.html</a></p>
 
+  <h2>Median Age in Asia (2024)</h2>
 
   <svg id="median_age" width="1000" height="800"></svg>
 
@@ -91,7 +91,7 @@
           });
 
         let legend = svg.append("g")
-          .attr("transform", "translate(20,20)");
+          .attr("transform", "translate(20,20)");         
 
         const legendData = [20, 25, 30, 35, 40, 45];
         const legendItemHeight = 20;
@@ -114,7 +114,17 @@
           .append("text")
           .attr("x", 30)
           .attr("y", (d, i) => i * legendItemHeight + 15)
-          .text(d => `${d} years`);
+          .text((d, i) => {
+          if (i === 0) return `< ${legendData[i + 1]} years`;
+          if (i === legendData.length - 1) return `> ${legendData[i]} years`;
+          return `${legendData[i]} - ${legendData[i + 1]} years`;
+        });
+
+        legend.append("text")
+          .attr("x", 0)
+          .attr("y", -6)
+          .style("font-weight", "bold")
+          .text("Median Age");
 
       });
     });
@@ -204,7 +214,7 @@
         legend.append("text")
           .attr("x", 0)
           .attr("y", 0)
-          .attr("class", "legend-title")
+          .style("font-weight", "bold")
           .text("Population Scale");
 
 
