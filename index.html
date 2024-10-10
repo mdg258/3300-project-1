@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <head>
   <meta charset="utf-8">
   <script src="https://d3js.org/d3.v4.js"></script>
@@ -6,371 +7,373 @@
   <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
+
 <body>
-<h2>Median Age in Asia (2024)</h2>
-<h3>Proof of concept</h3>
-<p>Code revised from: <a href="https://d3-graph-gallery.com/graph/choropleth_basic.html"
-    target="_blank">https://d3-graph-gallery.com/graph/choropleth_basic.html</a></p>
+  <h2>Median Age in Asia (2024)</h2>
+  <h3>Proof of concept</h3>
+  <p>Code revised from: <a href="https://d3-graph-gallery.com/graph/choropleth_basic.html"
+      target="_blank">https://d3-graph-gallery.com/graph/choropleth_basic.html</a></p>
 
 
-<svg id="median_age" width="1000" height="800"></svg>
+  <svg id="median_age" width="1000" height="800"></svg>
 
-<script>
-  const svg = d3.select("#median_age")
+  <script>
+    const svg = d3.select("#median_age")
 
-  const width = svg.attr("width");
-  const height = svg.attr("height");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
 
-  const projection = d3.geoMercator()
-    .scale(250)
-    .center([90, 50])
-    .translate([width / 2, height / 2]);
+    const projection = d3.geoMercator()
+      .scale(250)
+      .center([90, 50])
+      .translate([width / 2, height / 2]);
 
-  // ORIGINAL VALUES:
-  // const projection = d3.geoMercator()
-  // .scale(350)
-  // .center([100, 35])
-  // .translate([width / 2, height / 2]);
+    // ORIGINAL VALUES:
+    // const projection = d3.geoMercator()
+    // .scale(350)
+    // .center([100, 35])
+    // .translate([width / 2, height / 2]);
 
-  const path = d3.geoPath().projection(projection);
+    const path = d3.geoPath().projection(projection);
 
-  let data = d3.map();
-  const colorScale = d3.scaleThreshold()
-    .domain([20, 25, 30, 35, 40, 45])
-    // .range(["#ffffcc", "#ffeda0", "#feb24c", "#fd8d3c", "#e31a1c"])
-    // .range(d3.schemeBlues[7])
-    .range(d3.schemeOranges[7]);
-
-  d3.csv("project-data.csv", function (d) {
-    d["Med. Age"] = +d["Med. Age"].replace(/[^\d.-]/g, '');
-    data.set(d["Country (or dependency)"], d["Med. Age"]);
-  }, function (error, rows) {
-    if (error) throw error;
-
-    d3.json("updated_world.geojson", function (error, world) {
-      if (error) throw error;
-
-      let asiaCountriesList = [
-        "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh",
-        "Bhutan", "Brunei", "Cambodia", "China", "Cyprus", "Georgia",
-        "India", "Indonesia", "Iran", "Iraq", "Israel", "Japan", "Jordan",
-        "Kazakhstan", "Kuwait", "Kyrgyzstan", "Laos", "Lebanon", "Malaysia",
-        "Mongolia", "Myanmar", "Nepal", "North Korea", "Oman",
-        "Pakistan", "Palestine", "Philippines", "Qatar", "Russia", "Saudi Arabia",
-        "South Korea", "Sri Lanka", "Syria", "Taiwan", "Tajikistan",
-        "Thailand", "Timor-Leste", "Turkey", "Turkmenistan", "United Arab Emirates",
-        "Uzbekistan", "Vietnam", "Yemen", "Singapore", "Bahrain", "Maldives"
-      ];
-
-      let asiaCountries = world.features.filter(function (d) {
-        return asiaCountriesList.includes(d.properties.name);
-      });
-
-      const median_country_fill = d => {
-        const medianAge = data.get(d.properties.name);
-        if (medianAge) {
-          return colorScale(medianAge);
-        } else {
-          return "#ccc";
-        }
-      };
-
-      svg.append("g")
-        .selectAll("path")
-        .data(asiaCountries)
-        .enter()
-        .append("path")
-        .attr("class", "country")
-        .attr("d", path)
-        .attr("fill", d => {
-          const medianAge = data.get(d.properties.name);
-          console.log("Processing country:", d.properties.name, "Median Age:", medianAge ? medianAge : 'No data');
-          return median_country_fill(d);
-        });
-
-      let legend = svg.append("g")
-        .attr("transform", "translate(20,20)");
-
-      const legendData = [20, 25, 30, 35, 40, 45];
-      const legendItemHeight = 20;
-
-      const yLegend = ((d, i) => i * legendItemHeight);
-
-      legend.selectAll("rect")
-        .data(legendData)
-        .enter()
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", yLegend)
-        .attr("width", 20)
-        .attr("height", 20)
-        .attr("fill", d => colorScale(d));
-
-      legend.selectAll("text")
-        .data(legendData)
-        .enter()
-        .append("text")
-        .attr("x", 30)
-        .attr("y", (d, i) => i * legendItemHeight + 15)
-        .text(d => `${d} years`);
-
-    });
-  });
-</script>
-
-<h2>Total Population in Asia (2024)</h2>
-
-<svg id="population_map" width="1000" height="800"></svg>
-
-<script>
-  const svg_pop = d3.select("#population_map");
-  const width_pop = svg_pop.attr("width");
-  const height_pop = svg_pop.attr("height");
-
-  //create a map projection
-  const projection_pop = d3.geoMercator()
-    .scale(250)
-    .center([90, 50])
-    .translate([width / 2, height / 2]);
-  const path_pop = d3.geoPath().projection(projection_pop);
-
-  //stores country and population 
-  let data_pop = d3.map();
-  //array to store pop. values
-  let populationValues = [];
-
-  d3.csv("project-data.csv", function (d) {
-    //remove comma and convert to number 
-    d["Population (2024)"] = +d["Population (2024)"].replace(/,/g, '');
-    data_pop.set(d["Country (or dependency)"], d["Population (2024)"]);
-    populationValues.push(d["Population (2024)"]);
-  }, function (error, rows) {
-    if (error) throw error;
-
-    // min, max of population for scale
-    const populationExtent = d3.extent(populationValues);
-    const minPopulation = populationExtent[0];
-    const maxPopulation = populationExtent[1];
-
-    // color scale 
+    let data = d3.map();
     const colorScale = d3.scaleThreshold()
-      .domain([minPopulation, minPopulation * 10, minPopulation * 50, minPopulation * 100, maxPopulation * 0.5, maxPopulation])
+      .domain([20, 25, 30, 35, 40, 45])
+      // .range(["#ffffcc", "#ffeda0", "#feb24c", "#fd8d3c", "#e31a1c"])
+      // .range(d3.schemeBlues[7])
       .range(d3.schemeOranges[7]);
 
-    // load GeoJSON data and render the map
-    d3.json("updated_world.geojson", function (error, world) {
+    d3.csv("project-data.csv", function (d) {
+      d["Med. Age"] = +d["Med. Age"].replace(/[^\d.-]/g, '');
+      data.set(d["Country (or dependency)"], d["Med. Age"]);
+    }, function (error, rows) {
       if (error) throw error;
 
-      let asiaCountriesList = [
-        "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh",
-        "Bhutan", "Brunei", "Cambodia", "China", "Cyprus", "Georgia",
-        "India", "Indonesia", "Iran", "Iraq", "Israel", "Japan", "Jordan",
-        "Kazakhstan", "Kuwait", "Kyrgyzstan", "Laos", "Lebanon", "Malaysia",
-        "Mongolia", "Myanmar", "Nepal", "North Korea", "Oman",
-        "Pakistan", "Palestine", "Philippines", "Qatar", "Russia", "Saudi Arabia",
-        "South Korea", "Sri Lanka", "Syria", "Taiwan", "Tajikistan",
-        "Thailand", "Timor-Leste", "Turkey", "Turkmenistan", "United Arab Emirates",
-        "Uzbekistan", "Vietnam", "Yemen", "Singapore", "Bahrain", "Maldives"
-      ];
+      d3.json("updated_world.geojson", function (error, world) {
+        if (error) throw error;
 
-      //filter to only include asian countries from world GEoJson
-      let asiaCountries = world.features.filter(function (d) {
-        return asiaCountriesList.includes(d.properties.name);
-      });
+        let asiaCountriesList = [
+          "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh",
+          "Bhutan", "Brunei", "Cambodia", "China", "Cyprus", "Georgia",
+          "India", "Indonesia", "Iran", "Iraq", "Israel", "Japan", "Jordan",
+          "Kazakhstan", "Kuwait", "Kyrgyzstan", "Laos", "Lebanon", "Malaysia",
+          "Mongolia", "Myanmar", "Nepal", "North Korea", "Oman",
+          "Pakistan", "Palestine", "Philippines", "Qatar", "Russia", "Saudi Arabia",
+          "South Korea", "Sri Lanka", "Syria", "Taiwan", "Tajikistan",
+          "Thailand", "Timor-Leste", "Turkey", "Turkmenistan", "United Arab Emirates",
+          "Uzbekistan", "Vietnam", "Yemen", "Singapore", "Bahrain", "Maldives"
+        ];
 
-      // drawing the map
-      svg_pop.append("g")
-        .selectAll("path")
-        .data(asiaCountries)
-        .enter()
-        .append("path")
-        .attr("class", "country")
-        .attr("d", path_pop)
-        .attr("fill", d => {
-          const population = data_pop.get(d.properties.name);
-          if (population) {
-            return colorScale(population);
+        let asiaCountries = world.features.filter(function (d) {
+          return asiaCountriesList.includes(d.properties.name);
+        });
+
+        const median_country_fill = d => {
+          const medianAge = data.get(d.properties.name);
+          if (medianAge) {
+            return colorScale(medianAge);
           } else {
             return "#ccc";
           }
-        });
+        };
 
-      // legend
-      let legend = svg_pop.append("g")
-        .attr("transform", "translate(20,40)");
+        svg.append("g")
+          .selectAll("path")
+          .data(asiaCountries)
+          .enter()
+          .append("path")
+          .attr("class", "country")
+          .attr("d", path)
+          .attr("fill", d => {
+            const medianAge = data.get(d.properties.name);
+            console.log("Processing country:", d.properties.name, "Median Age:", medianAge ? medianAge : 'No data');
+            return median_country_fill(d);
+          });
 
-      legend.append("text")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("class", "legend-title")
-        .text("Population Scale");
+        let legend = svg.append("g")
+          .attr("transform", "translate(20,20)");
 
+        const legendData = [20, 25, 30, 35, 40, 45];
+        const legendItemHeight = 20;
 
-      const legendData = colorScale.domain();
+        const yLegend = ((d, i) => i * legendItemHeight);
 
-      const legendLabels = legendData.map((d, i, arr) => {
-        //localestring convert num to str and adds in commas. 
-        if (i === 0) return `< ${arr[i + 1].toLocaleString()}`;
-        if (i === arr.length - 1) return `> ${arr[i].toLocaleString()}`;
-        return `${arr[i].toLocaleString()} - ${arr[i + 1].toLocaleString()}`;
+        legend.selectAll("rect")
+          .data(legendData)
+          .enter()
+          .append("rect")
+          .attr("x", 0)
+          .attr("y", yLegend)
+          .attr("width", 20)
+          .attr("height", 20)
+          .attr("fill", d => colorScale(d));
+
+        legend.selectAll("text")
+          .data(legendData)
+          .enter()
+          .append("text")
+          .attr("x", 30)
+          .attr("y", (d, i) => i * legendItemHeight + 15)
+          .text(d => `${d} years`);
+
       });
-
-      const legendItemHeight = 20;
-
-      // adding legend color boxes
-      legend.selectAll("rect")
-        .data(legendData)
-        .enter()
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", (d, i) => i * legendItemHeight + 20)
-        .attr("width", 20)
-        .attr("height", 20)
-        .attr("fill", d => colorScale(d));
-
-      // adding labels to the legend
-      legend.selectAll("text.legend-label")
-        .data(legendLabels)
-        .enter()
-        .append("text")
-        .attr("class", "legend-label")
-        .attr("x", 30)
-        .attr("y", (d, i) => i * legendItemHeight + 35)
-        .text(d => d);
     });
-  });
-</script>
+  </script>
 
-<h2>Population Growth of Asian Countries (2024)</h2>
+  <h2>Total Population in Asia (2024)</h2>
 
-<svg id="growth" width="1000" height="800"></svg>
+  <svg id="population_map" width="1000" height="800"></svg>
 
-<script>
-  const gsvg = d3.select("#growth")
+  <script>
+    const svg_pop = d3.select("#population_map");
+    const width_pop = svg_pop.attr("width");
+    const height_pop = svg_pop.attr("height");
 
-  const gwidth = gsvg.attr("width");
-  const gheight = gsvg.attr("height");
+    //create a map projection
+    const projection_pop = d3.geoMercator()
+      .scale(250)
+      .center([90, 50])
+      .translate([width / 2, height / 2]);
+    const path_pop = d3.geoPath().projection(projection_pop);
 
-  const gprojection = d3.geoMercator()
-    .scale(250)
-    .center([90, 50])
-    .translate([gwidth / 2, gheight / 2]);
-  const gpath = d3.geoPath().projection(gprojection);
+    //stores country and population 
+    let data_pop = d3.map();
+    //array to store pop. values
+    let populationValues = [];
 
-  let pGrowthValues = [];
-  let gdata = d3.map();
-
-  const pcolorScale = d3.scaleThreshold()
-    .domain([-1, 0, 1, 2, 3, 4, 5])  
-    .range(d3.schemeGnBu[8]); 
-
-  d3.csv("project-data.csv", function (d) {
-    d["Yearly Change"] = +d["Yearly Change"].replace(/[^\d.-]/g, '');
-    gdata.set(d["Country (or dependency)"], d["Yearly Change"]);
-    pGrowthValues.push(d["Yearly Change"]);
-  }, function (error, rows) {
-    if (error) throw error;
-
-    const minpGrowth = d3.min(pGrowthValues);
-    const maxpGrowth = d3.max(pGrowthValues);
-
-    console.log("Minimum Population Growth%:", minpGrowth);
-    console.log("Maximum Population Growth%:", maxpGrowth);
-
-    d3.json("updated_world.geojson", function (error, world) {
+    d3.csv("project-data.csv", function (d) {
+      //remove comma and convert to number 
+      d["Population (2024)"] = +d["Population (2024)"].replace(/,/g, '');
+      data_pop.set(d["Country (or dependency)"], d["Population (2024)"]);
+      populationValues.push(d["Population (2024)"]);
+    }, function (error, rows) {
       if (error) throw error;
 
-      let asiaCountriesList = [
-        "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh",
-        "Bhutan", "Brunei", "Cambodia", "China", "Cyprus", "Georgia",
-        "India", "Indonesia", "Iran", "Iraq", "Israel", "Japan", "Jordan",
-        "Kazakhstan", "Kuwait", "Kyrgyzstan", "Laos", "Lebanon", "Malaysia",
-        "Mongolia", "Myanmar", "Nepal", "North Korea", "Oman",
-        "Pakistan", "Palestine", "Philippines", "Qatar", "Russia", "Saudi Arabia",
-        "South Korea", "Sri Lanka", "Syria", "Taiwan", "Tajikistan",
-        "Thailand", "Timor-Leste", "Turkey", "Turkmenistan", "United Arab Emirates",
-        "Uzbekistan", "Vietnam", "Yemen", "Singapore", "Bahrain", "Maldives"
-      ];
+      // min, max of population for scale
+      const populationExtent = d3.extent(populationValues);
+      const minPopulation = populationExtent[0];
+      const maxPopulation = populationExtent[1];
 
-      let asiaCountries = world.features.filter(function (d) {
-        return asiaCountriesList.includes(d.properties.name);
-      });
+      // color scale 
+      const colorScale = d3.scaleThreshold()
+        .domain([minPopulation, minPopulation * 10, minPopulation * 50, minPopulation * 100, maxPopulation * 0.5, maxPopulation])
+        .range(d3.schemeBuPu[7]);
 
-      const median_country_fill = d => {
-        const yearlyChange = gdata.get(d.properties.name);
-        if (yearlyChange !== undefined) {
-          return pcolorScale(yearlyChange);
-        } else {
-          return "#ccc";  
-        }
-      };
+      // load GeoJSON data and render the map
+      d3.json("updated_world.geojson", function (error, world) {
+        if (error) throw error;
 
-      gsvg.append("g")
-        .selectAll("path")
-        .data(asiaCountries)
-        .enter()
-        .append("path")
-        .attr("class", "country")
-        .attr("d", gpath)  
-        .attr("fill", d => {
-          const yearlyChange = gdata.get(d.properties.name);
-          console.log("Processing country:", d.properties.name, "Yearly Change:", yearlyChange ? yearlyChange : 'No data');
-          return median_country_fill(d);
+        let asiaCountriesList = [
+          "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh",
+          "Bhutan", "Brunei", "Cambodia", "China", "Cyprus", "Georgia",
+          "India", "Indonesia", "Iran", "Iraq", "Israel", "Japan", "Jordan",
+          "Kazakhstan", "Kuwait", "Kyrgyzstan", "Laos", "Lebanon", "Malaysia",
+          "Mongolia", "Myanmar", "Nepal", "North Korea", "Oman",
+          "Pakistan", "Palestine", "Philippines", "Qatar", "Russia", "Saudi Arabia",
+          "South Korea", "Sri Lanka", "Syria", "Taiwan", "Tajikistan",
+          "Thailand", "Timor-Leste", "Turkey", "Turkmenistan", "United Arab Emirates",
+          "Uzbekistan", "Vietnam", "Yemen", "Singapore", "Bahrain", "Maldives"
+        ];
+
+        //filter to only include asian countries from world GEoJson
+        let asiaCountries = world.features.filter(function (d) {
+          return asiaCountriesList.includes(d.properties.name);
         });
 
-      let legend = gsvg.append("g")
-        .attr("transform", "translate(20,20)");
+        // drawing the map
+        svg_pop.append("g")
+          .selectAll("path")
+          .data(asiaCountries)
+          .enter()
+          .append("path")
+          .attr("class", "country")
+          .attr("d", path_pop)
+          .attr("fill", d => {
+            const population = data_pop.get(d.properties.name);
+            if (population) {
+              return colorScale(population);
+            } else {
+              return "#ccc";
+            }
+          });
 
-      const legendData = [-1, 0, 1, 2, 3, 4, 5];
-      const legendItemHeight = 20;
+        // legend
+        let legend = svg_pop.append("g")
+          .attr("transform", "translate(20,40)");
 
-      const yLegend = ((d, i) => i * legendItemHeight);
+        legend.append("text")
+          .attr("x", 0)
+          .attr("y", 0)
+          .attr("class", "legend-title")
+          .text("Population Scale");
 
-      legend.selectAll("rect")
-        .data(legendData)
-        .enter()
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", yLegend)
-        .attr("width", 20)
-        .attr("height", 20)
-        .attr("fill", d => pcolorScale(d));
 
-      legend.selectAll("text")
-        .data(legendData)
-        .enter()
-        .append("text")
-        .attr("x", 30)
-        .attr("y", (d, i) => i * legendItemHeight + 15)
-        .text(d => `${d}%`);
+        const legendData = colorScale.domain();
 
-      legend.append("text")
-        .attr("x", 0)
-        .attr("y", -6)
-        .style("font-weight", "bold")
-        .text("Population Growth (%)");
+        const legendLabels = legendData.map((d, i, arr) => {
+          //localestring convert num to str and adds in commas. 
+          if (i === 0) return `< ${arr[i + 1].toLocaleString()}`;
+          if (i === arr.length - 1) return `> ${arr[i].toLocaleString()}`;
+          return `${arr[i].toLocaleString()} - ${arr[i + 1].toLocaleString()}`;
+        });
+
+        const legendItemHeight = 20;
+
+        // adding legend color boxes
+        legend.selectAll("rect")
+          .data(legendData)
+          .enter()
+          .append("rect")
+          .attr("x", 0)
+          .attr("y", (d, i) => i * legendItemHeight + 20)
+          .attr("width", 20)
+          .attr("height", 20)
+          .attr("fill", d => colorScale(d));
+
+        // adding labels to the legend
+        legend.selectAll("text.legend-label")
+          .data(legendLabels)
+          .enter()
+          .append("text")
+          .attr("class", "legend-label")
+          .attr("x", 30)
+          .attr("y", (d, i) => i * legendItemHeight + 35)
+          .text(d => d);
+      });
     });
-  });
-</script>
+  </script>
+
+  <h2>Population Growth of Asian Countries (2024)</h2>
+
+  <svg id="growth" width="1000" height="800"></svg>
+
+  <script>
+    const gsvg = d3.select("#growth")
+
+    const gwidth = gsvg.attr("width");
+    const gheight = gsvg.attr("height");
+
+    const gprojection = d3.geoMercator()
+      .scale(250)
+      .center([90, 50])
+      .translate([gwidth / 2, gheight / 2]);
+    const gpath = d3.geoPath().projection(gprojection);
+
+    let pGrowthValues = [];
+    let gdata = d3.map();
+
+    const pcolorScale = d3.scaleThreshold()
+      .domain([-1, 0, 1, 2, 3, 4, 5])
+      .range(d3.schemeGnBu[8]);
+
+    d3.csv("project-data.csv", function (d) {
+      d["Yearly Change"] = +d["Yearly Change"].replace(/[^\d.-]/g, '');
+      gdata.set(d["Country (or dependency)"], d["Yearly Change"]);
+      pGrowthValues.push(d["Yearly Change"]);
+    }, function (error, rows) {
+      if (error) throw error;
+
+      const minpGrowth = d3.min(pGrowthValues);
+      const maxpGrowth = d3.max(pGrowthValues);
+
+      console.log("Minimum Population Growth%:", minpGrowth);
+      console.log("Maximum Population Growth%:", maxpGrowth);
+
+      d3.json("updated_world.geojson", function (error, world) {
+        if (error) throw error;
+
+        let asiaCountriesList = [
+          "Afghanistan", "Armenia", "Azerbaijan", "Bangladesh",
+          "Bhutan", "Brunei", "Cambodia", "China", "Cyprus", "Georgia",
+          "India", "Indonesia", "Iran", "Iraq", "Israel", "Japan", "Jordan",
+          "Kazakhstan", "Kuwait", "Kyrgyzstan", "Laos", "Lebanon", "Malaysia",
+          "Mongolia", "Myanmar", "Nepal", "North Korea", "Oman",
+          "Pakistan", "Palestine", "Philippines", "Qatar", "Russia", "Saudi Arabia",
+          "South Korea", "Sri Lanka", "Syria", "Taiwan", "Tajikistan",
+          "Thailand", "Timor-Leste", "Turkey", "Turkmenistan", "United Arab Emirates",
+          "Uzbekistan", "Vietnam", "Yemen", "Singapore", "Bahrain", "Maldives"
+        ];
+
+        let asiaCountries = world.features.filter(function (d) {
+          return asiaCountriesList.includes(d.properties.name);
+        });
+
+        const median_country_fill = d => {
+          const yearlyChange = gdata.get(d.properties.name);
+          if (yearlyChange !== undefined) {
+            return pcolorScale(yearlyChange);
+          } else {
+            return "#ccc";
+          }
+        };
+
+        gsvg.append("g")
+          .selectAll("path")
+          .data(asiaCountries)
+          .enter()
+          .append("path")
+          .attr("class", "country")
+          .attr("d", gpath)
+          .attr("fill", d => {
+            const yearlyChange = gdata.get(d.properties.name);
+            console.log("Processing country:", d.properties.name, "Yearly Change:", yearlyChange ? yearlyChange : 'No data');
+            return median_country_fill(d);
+          });
+
+        let legend = gsvg.append("g")
+          .attr("transform", "translate(20,20)");
+
+        const legendData = [-1, 0, 1, 2, 3, 4, 5];
+        const legendItemHeight = 20;
+
+        const yLegend = ((d, i) => i * legendItemHeight);
+
+        legend.selectAll("rect")
+          .data(legendData)
+          .enter()
+          .append("rect")
+          .attr("x", 0)
+          .attr("y", yLegend)
+          .attr("width", 20)
+          .attr("height", 20)
+          .attr("fill", d => pcolorScale(d));
+
+        legend.selectAll("text")
+          .data(legendData)
+          .enter()
+          .append("text")
+          .attr("x", 30)
+          .attr("y", (d, i) => i * legendItemHeight + 15)
+          .text(d => `${d}%`);
+
+        legend.append("text")
+          .attr("x", 0)
+          .attr("y", -6)
+          .style("font-weight", "bold")
+          .text("Population Growth (%)");
+      });
+    });
+  </script>
 
 
 
 
 
 
-<br>
-<br>
+  <br>
+  <br>
 
-<p>Variables Used:</p>
-<ul>
-  <li>Country (or dependency): The name of the country.</li>
-  <li>Med. Age: The median age of the population in each country.</li>
-</ul>
+  <p>Variables Used:</p>
+  <ul>
+    <li>Country (or dependency): The name of the country.</li>
+    <li>Med. Age: The median age of the population in each country.</li>
+  </ul>
 
-<p>Note:</p>
-<ul>
-  <li>asia.geojson shows us a different map, but only has 46 countries</li>
-  <li>world.geojson has all countries needed</li>
-</ul>
+  <p>Note:</p>
+  <ul>
+    <li>asia.geojson shows us a different map, but only has 46 countries</li>
+    <li>world.geojson has all countries needed</li>
+  </ul>
 </body>
+
 </html>
